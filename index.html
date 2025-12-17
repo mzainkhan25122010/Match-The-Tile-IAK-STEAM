@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match The Tile IAK STEAM - Memory Game</title>
+    <link rel="icon" type="image/png" href="./logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== CSS RESET & BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --bg-color: #F6F6F6;
+            --card-bg: #FFFFFF;
+            --card-border: #E0E0E0;
+            --primary: #6C757D;
+            --accent: #ADB5BD;
+            --text-main: #212529;
+            --text-muted: #6C757D;
+            --text-disabled: #9AA0A6;
+            --btn-primary-bg: #6C757D;
+            --btn-primary-text: #FFFFFF;
+            --btn-primary-hover: #5A6268;
+            --btn-primary-active: #495057;
+            --btn-secondary-bg: #ADB5BD;
+            --btn-secondary-text: #212529;
+            --btn-secondary-hover: #9DA5AD;
+            --btn-secondary-active: #868E96;
+            --btn-disabled-bg: #CED4DA;
+            --btn-disabled-text: #FFFFFF;
+            --success: #2ECC71;
+            --error: #E74C3C;
+            --warning: #FFA500;
+            --timer-highlight: #495057;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .game-container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            min-height: 85vh;
+            position: relative;
+        }
+
+        /* ===== PAGE MANAGEMENT ===== */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 30px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .page.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ===== COMMON COMPONENTS ===== */
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .page-title {
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(14px, 3vw, 16px) clamp(25px, 4vw, 40px);
+            border-radius: 12px;
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            text-decoration: none;
+            border: none;
+            outline: none;
+            margin: 8px;
+            min-width: min(180px, 100%);
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--btn-primary-bg);
+            color: var(--btn-primary-text);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--btn-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: var(--btn-secondary-bg);
+            color: var(--btn-secondary-text);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--btn-secondary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e69500;
+            transform: translateY(-2px);
+        }
+
+        .btn-wide {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: clamp(25px, 5vw, 40px);
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: clamp(20px, 4vw, 28px);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: clamp(1rem, 2vw, 1.1rem);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: clamp(14px, 3vw, 18px);
+            border: 2px solid var(--accent);
+            border-radius: 10px;
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            transition: var(--transition);
+            background-color: var(--card-bg);
+            color: var(--text-main);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.2);
+        }
+
+        /* ===== WELCOME PAGE ===== */
+        #welcome-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: clamp(20px, 5vw, 40px);
+        }
+
+        .game-logo {
+            font-size: clamp(4rem, 15vw, 5.5rem);
+            color: var(--primary);
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .welcome-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 40px;
+        }
+
+        /* ===== USERNAME PAGE ===== */
+        #username-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* ===== LEVELS PAGE ===== */
+        #levels-page {
+            padding: clamp(20px, 4vw, 30px);
+        }
+
+        .levels-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(120px, 100%), 1fr));
+            gap: clamp(12px, 3vw, 20px);
+            margin-top: 25px;
+        }
+
+        .level-card {
+            aspect-ratio: 1;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: 2px solid var(--accent);
+            transition: var(--transition);
+            font-weight: 600;
+            font-size: clamp(1.2rem, 3vw, 1.4rem);
+            color: var(--text-main);
+            padding: 10px;
+        }
+
+        .level-card:hover {
+            border-color: var(--primary);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .level-card.active {
+            border-color: var(--primary);
+            background-color: rgba(108, 117, 125, 0.1);
+            transform: scale(1.05);
+        }
+
+        .level-card.completed {
+            background-color: rgba(46, 204, 113, 0.1);
+            border-color: var(--success);
+        }
+
+        .level-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: var(--btn-disabled-bg);
+        }
+
+        .level-number {
+            font-size: clamp(1.8rem, 4vw, 2.2rem);
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .level-difficulty {
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        /* ===== TIMER PAGE ===== */
+        #timer-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: clamp(20px, 4vw, 30px);
+        }
+
+        .timer-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+            gap: clamp(15px, 3vw, 25px);
+            width: 100%;
+            max-width: 800px;
+            margin: clamp(20px, 4vw, 40px) 0;
+        }
+
+        .timer-card {
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid var(--accent);
+            transition: var(--transition);
+            background-color: var(--card-bg);
+            padding: clamp(20px, 4vw, 30px);
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+        }
+
+        .timer-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .timer-card.active {
+            border-color: var(--primary);
+            background-color: rgba(108, 117, 125, 0.05);
+        }
+
+        .timer-value {
+            font-size: clamp(2.5rem, 6vw, 3.2rem);
+            font-weight: 800;
+            color: var(--timer-highlight);
+            margin-bottom: 8px;
+        }
+
+        .timer-label {
+            color: var(--text-muted);
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+        }
+
+        /* ===== GAME PAGE ===== */
+        .game-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            background-color: var(--bg-color);
+            padding: clamp(15px, 3vw, 25px) clamp(20px, 4vw, 30px);
+            border-radius: 14px;
+            margin-bottom: clamp(20px, 4vw, 35px);
+            border: 1px solid var(--card-border);
+        }
+
+        @media (min-width: 768px) {
+            .game-header {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(120px, 100%), 1fr));
+            gap: clamp(15px, 3vw, 25px);
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .game-info {
+                width: auto;
+                display: flex;
+                gap: clamp(15px, 3vw, 25px);
+            }
+        }
+
+        .info-box {
+            background-color: var(--card-bg);
+            padding: clamp(15px, 3vw, 20px) clamp(18px, 3vw, 25px);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 1px solid var(--card-border);
+            min-width: 0;
+        }
+
+        .info-label {
+            font-size: clamp(0.8rem, 2vw, 0.95rem);
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: clamp(1.5rem, 4vw, 1.8rem);
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .timer-display {
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            font-weight: 800;
+            color: var(--timer-highlight);
+            background-color: var(--card-bg);
+            padding: clamp(12px, 3vw, 15px) clamp(20px, 4vw, 30px);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--timer-highlight);
+            text-align: center;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .timer-display {
+                width: auto;
+            }
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: clamp(10px, 2vw, 18px);
+            max-width: min(900px, 95vw);
+            margin: 0 auto;
+        }
+
+        @media (max-width: 480px) {
+            .game-board {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+        }
+
+        .tile {
+            aspect-ratio: 1;
+            background-color: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            color: white;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.5s, background-color 0.3s;
+            box-shadow: var(--shadow);
+            user-select: none;
+            position: relative;
+        }
+
+        .tile .front,
+        .tile .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+        }
+
+        .tile .front {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .tile .back {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            transform: rotateY(180deg);
+            font-size: clamp(1.6rem, 4vw, 2.5rem);
+            border: 2px solid var(--card-border);
+        }
+
+        .tile.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .tile.matched {
+            background-color: var(--success);
+            cursor: default;
+        }
+
+        .tile.matched .back {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .game-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: clamp(15px, 3vw, 25px);
+            margin-top: clamp(25px, 5vw, 45px);
+        }
+
+        /* ===== RESULTS PAGE ===== */
+        #results-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: clamp(20px, 4vw, 30px);
+        }
+
+        .results-card {
+            width: 100%;
+            max-width: min(700px, 95vw);
+            text-align: center;
+            background-color: var(--card-bg);
+            padding: clamp(30px, 5vw, 50px);
+            border-radius: 18px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow);
+        }
+
+        .result-status {
+            display: inline-block;
+            padding: clamp(15px, 3vw, 20px) clamp(30px, 5vw, 50px);
+            border-radius: 50px;
+            font-size: clamp(1.8rem, 4vw, 2.2rem);
+            font-weight: 800;
+            margin-bottom: clamp(25px, 4vw, 40px);
+        }
+
+        .result-win {
+            background-color: rgba(46, 204, 113, 0.15);
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+
+        .result-lose {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--error);
+            border: 2px solid var(--error);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+            gap: clamp(15px, 3vw, 25px);
+            margin: clamp(25px, 4vw, 40px) 0;
+        }
+
+        .result-item {
+            background-color: var(--bg-color);
+            padding: clamp(18px, 3vw, 25px);
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        .result-label {
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-value {
+            font-size: clamp(1.6rem, 4vw, 2rem);
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* ===== INSTRUCTIONS PAGE ===== */
+        #instructions-page {
+            max-width: min(800px, 95vw);
+            margin: 0 auto;
+            padding: clamp(20px, 4vw, 30px);
+        }
+
+        .instructions-content {
+            background-color: var(--card-bg);
+            padding: clamp(25px, 4vw, 40px);
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow);
+        }
+
+        .instruction-section {
+            margin-bottom: clamp(25px, 4vw, 35px);
+        }
+
+        .instruction-section h3 {
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-size: clamp(1.4rem, 3vw, 1.6rem);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 8px;
+        }
+
+        .instruction-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .instruction-list li {
+            margin-bottom: 10px;
+            padding-left: clamp(25px, 4vw, 30px);
+            position: relative;
+            line-height: 1.6;
+            color: var(--text-main);
+            font-size: clamp(1rem, 2vw, 1.1rem);
+        }
+
+        .instruction-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: bold;
+            font-size: clamp(1.1rem, 2vw, 1.2rem);
+        }
+
+        /* ===== ADMIN PANEL PAGE ===== */
+        #admin-page {
+            max-width: min(1000px, 95vw);
+            margin: 0 auto;
+            padding: clamp(20px, 4vw, 30px);
+        }
+
+        .admin-login {
+            max-width: min(450px, 95vw);
+            margin: 0 auto;
+        }
+
+        .admin-panel {
+            display: none;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+            gap: clamp(15px, 3vw, 20px);
+            margin-bottom: clamp(25px, 4vw, 30px);
+        }
+
+        .stat-card {
+            background-color: var(--bg-color);
+            padding: clamp(18px, 3vw, 25px);
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-value {
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .history-table-container {
+            overflow-x: auto;
+            margin: clamp(25px, 4vw, 35px) 0;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-bg);
+            min-width: 600px;
+        }
+
+        .history-table thead {
+            background-color: var(--primary);
+            position: sticky;
+            top: 0;
+        }
+
+        .history-table th {
+            color: var(--btn-primary-text);
+            padding: clamp(15px, 3vw, 20px);
+            text-align: left;
+            font-weight: 600;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            white-space: nowrap;
+        }
+
+        .history-table td {
+            padding: clamp(12px, 2vw, 18px) clamp(15px, 3vw, 20px);
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-main);
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .history-table tbody tr:hover {
+            background-color: rgba(108, 117, 125, 0.05);
+        }
+
+        .history-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .result-badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .badge-win {
+            background-color: rgba(46, 204, 113, 0.15);
+            color: var(--success);
+        }
+
+        .badge-lose {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--error);
+        }
+
+        /* ===== FOOTER ===== */
+        .page-footer {
+            text-align: center;
+            margin-top: clamp(40px, 6vw, 60px);
+            padding-top: 20px;
+            border-top: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-size: clamp(0.85rem, 2vw, 0.95rem);
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mt-30 {
+            margin-top: 30px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page.active {
+            animation: slideIn 0.4s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <!-- ===== WELCOME PAGE ===== -->
+        <div id="welcome-page" class="page active">
+            <div class="page-header">
+                <div class="game-logo">
+                    <i class="fas fa-puzzle-piece"></i>
+                </div>
+                <h1 class="page-title">Match The Tile IAK STEAM</h1>
+                <p class="page-subtitle">Challenge your memory with this engaging tile matching game. Find all pairs
+                    before time runs out!</p>
+            </div>
+
+            <div class="welcome-buttons">
+                <button class="btn btn-primary" onclick="Navigation.goToPage('username')">
+                    <i class="fas fa-play-circle"></i> Start Game
+                </button>
+                <button class="btn btn-secondary" onclick="Navigation.goToPage('instructions')">
+                    <i class="fas fa-book"></i> Instructions
+                </button>
+                <button class="btn btn-secondary" onclick="Navigation.goToPage('admin')">
+                    <i class="fas fa-user-shield"></i> Admin Panel
+                </button>
+            </div>
+
+            <div class="page-footer">
+                <p>Match The Tile &copy; 2023 | Memory Challenge Game</p>
+            </div>
+        </div>
+
+        <!-- ===== USERNAME PAGE ===== -->
+        <div id="username-page" class="page">
+            <div class="page-header">
+                <h1 class="page-title">Enter Username</h1>
+                <p class="page-subtitle">Choose a username to track your progress across levels</p>
+            </div>
+
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="username-input" class="form-label">Username</label>
+                    <input type="text" id="username-input" class="form-input" placeholder="Enter your username"
+                        maxlength="20">
+                    <small style="color: var(--text-muted); display: block; margin-top: 8px;">Username will be saved for
+                        your game history</small>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn btn-primary btn-wide" onclick="GameState.setUsername()">Continue to
+                        Levels</button>
+                    <button class="btn btn-secondary btn-wide" onclick="Navigation.goToPage('welcome')">Back to
+                        Home</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== LEVELS PAGE ===== -->
+        <div id="levels-page" class="page">
+            <div class="page-header">
+                <h1 class="page-title">Select Level</h1>
+                <p class="page-subtitle">Choose a level to play. Complete levels to unlock harder challenges.</p>
+            </div>
+
+            <div class="levels-container" id="levels-container">
+                <!-- Levels generated by JavaScript -->
+            </div>
+
+            <div class="levels-controls">
+                <button class="btn btn-primary" onclick="GameState.selectLevel()">Select Level</button>
+                <button class="btn btn-secondary" onclick="Navigation.goToPage('username')">Back</button>
+            </div>
+        </div>
+
+        <!-- ===== TIMER PAGE ===== -->
+        <div id="timer-page" class="page">
+            <div class="page-header">
+                <h1 class="page-title">Select Time Limit</h1>
+                <p class="page-subtitle">Choose how much time you want for your game</p>
+            </div>
+
+            <div class="timer-options">
+                <div class="timer-card" data-time="30" onclick="GameState.selectTimer(30)">
+                    <div class="timer-value">30s</div>
+                    <div class="timer-label">Easy Mode</div>
+                </div>
+                <div class="timer-card active" data-time="60" onclick="GameState.selectTimer(60)">
+                    <div class="timer-value">60s</div>
+                    <div class="timer-label">Normal Mode</div>
+                </div>
+                <div class="timer-card" data-time="90" onclick="GameState.selectTimer(90)">
+                    <div class="timer-value">90s</div>
+                    <div class="timer-label">Challenge Mode</div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button class="btn btn-primary" onclick="GameState.startGame()">Start Game</button>
+                <button class="btn btn-secondary" onclick="Navigation.goToPage('levels')">Back to Levels</button>
+            </div>
+        </div>
+
+        <!-- ===== GAME PAGE ===== -->
+        <div id="game-page" class="page">
+            <div class="game-header">
+                <div class="game-info">
+                    <div class="info-box">
+                        <div class="info-label">Player</div>
+                        <div class="info-value" id="game-player">Guest</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Level</div>
+                        <div class="info-value" id="game-level">1</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Moves</div>
+                        <div class="info-value" id="game-moves">0</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Matches</div>
+                        <div class="info-value" id="game-matches">0/8</div>
+                    </div>
+                </div>
+
+                <div class="timer-display" id="game-timer">60s</div>
+            </div>
+
+            <div class="game-board" id="game-board">
+                <!-- Tiles generated by JavaScript -->
+            </div>
+
+            <div class="game-controls">
+                <button class="btn btn-primary" onclick="GameState.restartGame()">
+                    <i class="fas fa-redo"></i> Restart Game
+                </button>
+                <button class="btn btn-secondary" onclick="Navigation.goToPage('welcome')">
+                    <i class="fas fa-home"></i> Quit to Home
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== RESULTS PAGE ===== -->
+        <div id="results-page" class="page">
+            <div class="page-header">
+                <h1 class="page-title">Game Results</h1>
+                <p class="page-subtitle">See your performance in the completed game</p>
+            </div>
+
+            <div class="results-card">
+                <div id="result-status" class="result-status result-win">You Win!</div>
+
+                <div class="results-grid">
+                    <div class="result-item">
+                        <div class="result-label">Username</div>
+                        <div class="result-value" id="result-username">Guest</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Level</div>
+                        <div class="result-value" id="result-level">1</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Time Limit</div>
+                        <div class="result-value" id="result-timer">60s</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Score</div>
+                        <div class="result-value" id="result-score">0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Moves</div>
+                        <div class="result-value" id="result-moves">0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Time Left</div>
+                        <div class="result-value" id="result-time-left">0s</div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="Navigation.goToPage('levels')">
+                        <i class="fas fa-play-circle"></i> Play Again
+                    </button>
+                    <button class="btn btn-secondary" onclick="Navigation.goToPage('welcome')">
+                        <i class="fas fa-home"></i> Back to Home
+                    </button>
+                    <!-- NEW: Admin Panel Button on Results Page -->
+                    <button class="btn btn-warning" onclick="Navigation.goToPage('admin')">
+                        <i class="fas fa-user-shield"></i> Admin Panel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== INSTRUCTIONS PAGE ===== -->
+        <div id="instructions-page" class="page">
+            <div class="page-header">
+                <h1 class="page-title">Game Instructions</h1>
+                <p class="page-subtitle">Learn how to play Match The Tile</p>
+            </div>
+
+            <div class="instructions-content">
+                <div class="instruction-section">
+                    <h3>How to Play</h3>
+                    <p>Match The Tile is a memory-based puzzle game where you need to find matching pairs of tiles
+                        within a time limit.</p>
+                </div>
+
+                <div class="instruction-section">
+                    <h3>Game Rules</h3>
+                    <ul class="instruction-list">
+                        <li>Click on tiles to flip them and reveal their symbols</li>
+                        <li>Flip two tiles at a time to try and find a matching pair</li>
+                        <li>If the tiles match, they will remain face up</li>
+                        <li>If they don't match, they will flip back after a short delay</li>
+                        <li>Find all pairs before time runs out to win the game</li>
+                        <li>Complete levels to unlock more challenging games</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-section">
+                    <h3>Scoring System</h3>
+                    <ul class="instruction-list">
+                        <li>Each matched pair: <strong>100 points</strong></li>
+                        <li>Each second remaining: <strong>10 bonus points</strong></li>
+                        <li>Each move made: <strong>-5 points</strong></li>
+                        <li>Level completion bonus: <strong>Level × 200 points</strong></li>
+                        <li>Timer bonus multiplier: <strong>30s=1x, 60s=1.5x, 90s=2x</strong></li>
+                    </ul>
+                </div>
+
+                <div class="instruction-section">
+                    <h3>Tips for Success</h3>
+                    <ul class="instruction-list">
+                        <li>Start with the easier levels to learn tile patterns</li>
+                        <li>Remember tile positions as you flip them</li>
+                        <li>Plan your moves to minimize unnecessary flips</li>
+                        <li>Practice with different timer settings to improve your speed</li>
+                    </ul>
+                </div>
+
+                <div class="text-center mt-30">
+                    <button class="btn btn-primary" onclick="Navigation.goToPage('welcome')">
+                        <i class="fas fa-home"></i> Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ADMIN PANEL PAGE ===== -->
+        <div id="admin-page" class="page">
+            <div class="page-header">
+                <h1 class="page-title">Admin Panel</h1>
+                <p class="page-subtitle">Access game statistics and user history</p>
+            </div>
+
+            <div class="admin-login" id="admin-login-form">
+                <div class="form-container">
+                    <h3 style="color: var(--primary); margin-bottom: 25px; text-align: center;">Admin Login</h3>
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" id="admin-username" class="form-input" placeholder="Enter admin username">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="admin-password" class="form-input"
+                            placeholder="Enter admin password">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary btn-wide" onclick="Admin.login()">Login</button>
+                        <button class="btn btn-secondary btn-wide" onclick="Navigation.goToPage('welcome')">Back to
+                            Home</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-panel" id="admin-panel-content">
+                <div class="admin-stats" id="admin-stats">
+                    <!-- Stats will be loaded here -->
+                </div>
+
+                <div class="form-container">
+                    <h3 style="color: var(--primary); margin-bottom: 20px; text-align: center;">Game History Dashboard
+                    </h3>
+                    <p style="color: var(--text-muted); margin-bottom: 25px; text-align: center;">Complete history of
+                        all user games played</p>
+
+                    <div class="history-table-container">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Date & Time</th>
+                                    <th>Level</th>
+                                    <th>Timer</th>
+                                    <th>Score</th>
+                                    <th>Moves</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <!-- History will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="Admin.loadGameHistory()">
+                            <i class="fas fa-sync-alt"></i> Refresh History
+                        </button>
+                        <!-- NEW: Clear All History Button -->
+                        <button class="btn btn-danger" onclick="Admin.clearAllHistory()">
+                            <i class="fas fa-trash-alt"></i> Clear All History
+                        </button>
+                        <button class="btn btn-secondary" onclick="Admin.logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== GAME STATE MANAGEMENT =====
+        const GameState = {
+            currentUser: localStorage.getItem('matchTheTile_username') || '',
+            selectedLevel: 1,
+            selectedTimer: 60,
+            gameActive: false,
+            moves: 0,
+            matches: 0,
+            score: 0,
+            timeLeft: 0,
+            timerInterval: null,
+            flippedTiles: [],
+            matchedPairs: 0,
+            totalPairs: 8,
+            tileValues: [],
+            completedLevels: JSON.parse(localStorage.getItem('matchTheTile_completedLevels')) || [],
+
+            // Level configurations
+            levelConfigs: {
+                1: { pairs: 4, grid: 2, symbols: ['🍎', '🍌', '🍒', '🍇'] },
+                2: { pairs: 6, grid: 3, symbols: ['🍎', '🍌', '🍒', '🍇', '🍊', '🍓'] },
+                3: { pairs: 8, grid: 4, symbols: ['🍎', '🍌', '🍒', '🍇', '🍊', '🍓', '🍉', '🥭'] },
+                4: { pairs: 8, grid: 4, symbols: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'] },
+                5: { pairs: 9, grid: 3, symbols: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🎱', '🏓', '🏸'] },
+                6: { pairs: 10, grid: 4, symbols: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐'] },
+                7: { pairs: 12, grid: 4, symbols: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕'] },
+                8: { pairs: 12, grid: 4, symbols: ['⭐', '🌟', '🌠', '☀️', '🌙', '☁️', '🌈', '🌊', '🔥', '❄️', '💧', '🌪️'] },
+                9: { pairs: 13, grid: 4, symbols: ['🍕', '🍔', '🍟', '🌭', '🥪', '🌮', '🌯', '🥗', '🍣', '🍩', '🍪', '🎂', '🍦'] },
+                10: { pairs: 14, grid: 4, symbols: ['📱', '💻', '⌚', '📷', '🎮', '🕹️', '📺', '🎧', '🎙️', '🎚️', '🎛️', '📻', '📟', '📠'] },
+                11: { pairs: 15, grid: 4, symbols: ['🎨', '🎭', '🎬', '🎤', '🎧', '🎼', '🎹', '🥁', '🎷', '🎺', '🎸', '🪕', '🎻', '🎲', '♟️'] },
+                12: { pairs: 16, grid: 4, symbols: ['🌍', '🌎', '🌏', '🗺️', '🏔️', '🌋', '🏜️', '🏖️', '🏝️', '🏕️', '🏠', '🏥', '🏦', '🏫', '🏟️', '🎡'] },
+                13: { pairs: 16, grid: 4, symbols: ['👑', '🎩', '🎓', '🧢', '👒', '🎒', '👝', '👜', '💼', '☂️', '🧳', '🌂', '🧴', '💄', '💍', '📿'] },
+                14: { pairs: 18, grid: 6, symbols: ['🐵', '🐒', '🦍', '🦧', '🐶', '🐕', '🦮', '🐕‍🦺', '🐩', '🐺', '🦊', '🦝', '🐱', '🐈', '🐈‍⬛', '🦁', '🐯', '🐅'] },
+                15: { pairs: 18, grid: 6, symbols: ['🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅'] },
+                16: { pairs: 20, grid: 5, symbols: ['🥇', '🥈', '🥉', '🏆', '🎖️', '🏅', '⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏'] },
+                17: { pairs: 20, grid: 5, symbols: ['🚀', '🛸', '🛰️', '💺', '🛩️', '🛫', '🛬', '🪂', '🛶', '🚤', '🛥️', '🛳️', '⛴️', '🚢', '🚁', '🛶', '🚂', '🚃', '🚄', '🚅'] },
+                18: { pairs: 22, grid: 6, symbols: ['🎯', '🎪', '🎭', '🎨', '🖼️', '🎰', '🚂', '🚃', '🚄', '🚅', '🚆', '🚇', '🚈', '🚉', '🚊', '🚝', '🚞', '🚋', '🚌', '🚍', '🚎', '🚐'] },
+                19: { pairs: 24, grid: 6, symbols: ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘', '🌙', '🌚', '🌛', '🌜', '🌡️', '☀️', '🌤️', '⛅', '🌥️', '🌦️', '🌧️', '⛈️', '🌩️', '🌨️', '❄️', '☃️'] },
+                20: { pairs: 24, grid: 6, symbols: ['🎄', '🎅', '🧑‍🎄', '🎁', '🕎', '🕯️', '🎊', '🎉', '🎎', '🎏', '🎐', '🎑', '🧧', '🪔', '🎀', '🎗️', '🎟️', '🎫', '🎖️', '🏆', '🏅', '🥇', '🥈', '🥉'] }
+            },
+
+            // Set username
+            setUsername: function () {
+                const usernameInput = document.getElementById('username-input');
+                const username = usernameInput.value.trim();
+
+                if (!username) {
+                    alert('Please enter a username to continue.');
+                    usernameInput.focus();
+                    return;
+                }
+
+                if (username.length < 2) {
+                    alert('Username must be at least 2 characters long.');
+                    usernameInput.focus();
+                    return;
+                }
+
+                this.currentUser = username;
+                localStorage.setItem('matchTheTile_username', username);
+                Navigation.goToPage('levels');
+            },
+
+            // Initialize levels page
+            initializeLevelsPage: function () {
+                const levelsContainer = document.getElementById('levels-container');
+                levelsContainer.innerHTML = '';
+
+                for (let i = 1; i <= 20; i++) {
+                    const levelCard = document.createElement('div');
+                    levelCard.className = 'level-card';
+
+                    // Check if level is unlocked
+                    if (i === 1 || this.completedLevels.includes(i - 1)) {
+                        levelCard.classList.add('completed');
+                    } else {
+                        levelCard.classList.add('locked');
+                    }
+
+                    // Mark as active if selected
+                    if (i === this.selectedLevel) {
+                        levelCard.classList.add('active');
+                    }
+
+                    levelCard.innerHTML = `
+                        <div class="level-number">${i}</div>
+                        <div class="level-difficulty">${i <= 5 ? 'Easy' : i <= 10 ? 'Medium' : i <= 15 ? 'Hard' : 'Expert'}</div>
+                    `;
+
+                    // Only allow click if unlocked
+                    if (i === 1 || this.completedLevels.includes(i - 1)) {
+                        levelCard.onclick = () => {
+                            document.querySelectorAll('.level-card').forEach(card => {
+                                card.classList.remove('active');
+                            });
+                            levelCard.classList.add('active');
+                            this.selectedLevel = i;
+                        };
+                    }
+
+                    levelsContainer.appendChild(levelCard);
+                }
+            },
+
+            // Select level and proceed
+            selectLevel: function () {
+                if (!this.currentUser) {
+                    alert('Please set a username first.');
+                    Navigation.goToPage('username');
+                    return;
+                }
+
+                Navigation.goToPage('timer');
+            },
+
+            // Select timer
+            selectTimer: function (seconds) {
+                this.selectedTimer = seconds;
+
+                document.querySelectorAll('.timer-card').forEach(card => {
+                    card.classList.remove('active');
+                    if (parseInt(card.dataset.time) === seconds) {
+                        card.classList.add('active');
+                    }
+                });
+            },
+
+            // Start the game
+            startGame: function () {
+                if (!this.currentUser) {
+                    alert('Please set a username first.');
+                    Navigation.goToPage('username');
+                    return;
+                }
+
+                const config = this.levelConfigs[this.selectedLevel];
+                if (!config) {
+                    alert('Invalid level configuration. Please select a different level.');
+                    return;
+                }
+
+                // Reset game state
+                this.moves = 0;
+                this.matches = 0;
+                this.score = 0;
+                this.matchedPairs = 0;
+                this.flippedTiles = [];
+                this.timeLeft = this.selectedTimer;
+                this.gameActive = true;
+                this.totalPairs = config.pairs;
+
+                // Update UI
+                document.getElementById('game-player').textContent = this.currentUser;
+                document.getElementById('game-level').textContent = this.selectedLevel;
+                document.getElementById('game-moves').textContent = '0';
+                document.getElementById('game-matches').textContent = `0/${config.pairs}`;
+                document.getElementById('game-timer').textContent = `${this.timeLeft}s`;
+
+                // Setup game board
+                const gameBoard = document.getElementById('game-board');
+                gameBoard.innerHTML = '';
+
+                // Create tile array
+                const tileSymbols = [];
+                for (let i = 0; i < config.pairs; i++) {
+                    tileSymbols.push(config.symbols[i], config.symbols[i]);
+                }
+
+                // Shuffle tiles
+                this.tileValues = tileSymbols.sort(() => Math.random() - 0.5);
+
+                // Set grid layout based on pairs
+                const gridCols = Math.ceil(Math.sqrt(config.pairs * 2));
+                gameBoard.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
+
+                // Create tiles
+                for (let i = 0; i < config.pairs * 2; i++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.dataset.index = i;
+                    tile.dataset.value = this.tileValues[i];
+
+                    const front = document.createElement('div');
+                    front.className = 'front';
+                    front.innerHTML = '<i class="fas fa-question"></i>';
+
+                    const back = document.createElement('div');
+                    back.className = 'back';
+                    back.textContent = this.tileValues[i];
+
+                    tile.appendChild(front);
+                    tile.appendChild(back);
+
+                    tile.onclick = () => this.flipTile(tile);
+
+                    gameBoard.appendChild(tile);
+                }
+
+                // Start timer
+                this.startGameTimer();
+
+                // Show game page
+                Navigation.goToPage('game');
+            },
+
+            // Game timer
+            startGameTimer: function () {
+                clearInterval(this.timerInterval);
+
+                this.timerInterval = setInterval(() => {
+                    if (this.gameActive) {
+                        this.timeLeft--;
+                        document.getElementById('game-timer').textContent = `${this.timeLeft}s`;
+
+                        if (this.timeLeft <= 0) {
+                            clearInterval(this.timerInterval);
+                            this.gameActive = false;
+                            this.endGame(false);
+                        }
+                    }
+                }, 1000);
+            },
+
+            // Flip tile logic
+            flipTile: function (tile) {
+                if (!this.gameActive ||
+                    tile.classList.contains('matched') ||
+                    tile.classList.contains('flipped') ||
+                    this.flippedTiles.length >= 2) {
+                    return;
+                }
+
+                // Flip the tile
+                tile.classList.add('flipped');
+                this.flippedTiles.push(tile);
+
+                // Check for match when two tiles are flipped
+                if (this.flippedTiles.length === 2) {
+                    this.moves++;
+                    document.getElementById('game-moves').textContent = this.moves;
+
+                    const tile1 = this.flippedTiles[0];
+                    const tile2 = this.flippedTiles[1];
+
+                    if (tile1.dataset.value === tile2.dataset.value) {
+                        // Match found
+                        setTimeout(() => {
+                            tile1.classList.add('matched');
+                            tile2.classList.add('matched');
+
+                            this.matchedPairs++;
+                            this.matches += 100;
+                            document.getElementById('game-matches').textContent = `${this.matchedPairs}/${this.totalPairs}`;
+
+                            // Check if all pairs are matched
+                            if (this.matchedPairs === this.totalPairs) {
+                                clearInterval(this.timerInterval);
+                                this.gameActive = false;
+                                this.score = this.calculateScore();
+
+                                // Mark level as completed
+                                if (!this.completedLevels.includes(this.selectedLevel)) {
+                                    this.completedLevels.push(this.selectedLevel);
+                                    localStorage.setItem('matchTheTile_completedLevels', JSON.stringify(this.completedLevels));
+                                }
+
+                                this.endGame(true);
+                            }
+
+                            this.flippedTiles = [];
+                        }, 500);
+                    } else {
+                        // No match - flip back after delay
+                        setTimeout(() => {
+                            tile1.classList.remove('flipped');
+                            tile2.classList.remove('flipped');
+                            this.flippedTiles = [];
+                        }, 1000);
+                    }
+                }
+            },
+
+            // Calculate score
+            calculateScore: function () {
+                let score = this.matches; // Base score from matches
+                score += this.timeLeft * 10; // Bonus for remaining time
+                score -= this.moves * 5; // Penalty for moves
+                score += this.selectedLevel * 200; // Level completion bonus
+
+                // Timer bonus multiplier
+                if (this.selectedTimer === 30) score *= 1;
+                else if (this.selectedTimer === 60) score *= 1.5;
+                else if (this.selectedTimer === 90) score *= 2;
+
+                return Math.max(0, Math.round(score));
+            },
+
+            // End game
+            endGame: function (isWin) {
+                this.score = this.calculateScore();
+
+                // Update results page
+                const resultStatus = document.getElementById('result-status');
+                resultStatus.textContent = isWin ? 'You Win!' : 'Time\'s Up!';
+                resultStatus.className = isWin ? 'result-status result-win' : 'result-status result-lose';
+
+                document.getElementById('result-username').textContent = this.currentUser;
+                document.getElementById('result-level').textContent = this.selectedLevel;
+                document.getElementById('result-timer').textContent = `${this.selectedTimer}s`;
+                document.getElementById('result-score').textContent = this.score;
+                document.getElementById('result-moves').textContent = this.moves;
+                document.getElementById('result-time-left').textContent = `${this.timeLeft}s`;
+
+                // Save game result
+                this.saveGameResult(isWin);
+
+                // Show results page
+                Navigation.goToPage('results');
+            },
+
+            // Save game result
+            saveGameResult: function (isWin) {
+                const gameHistory = JSON.parse(localStorage.getItem('matchTheTile_history')) || [];
+
+                const gameResult = {
+                    username: this.currentUser,
+                    date: new Date().toLocaleString(),
+                    level: this.selectedLevel,
+                    timer: this.selectedTimer,
+                    score: this.score,
+                    moves: this.moves,
+                    result: isWin ? 'Win' : 'Lose'
+                };
+
+                gameHistory.push(gameResult);
+
+                // Keep only last 100 games
+                if (gameHistory.length > 100) {
+                    gameHistory.shift();
+                }
+
+                localStorage.setItem('matchTheTile_history', JSON.stringify(gameHistory));
+            },
+
+            // Restart game
+            restartGame: function () {
+                if (confirm('Are you sure you want to restart the game? Your current progress will be lost.')) {
+                    clearInterval(this.timerInterval);
+                    this.startGame();
+                }
+            }
+        };
+
+        // ===== NAVIGATION SYSTEM =====
+        const Navigation = {
+            currentPage: 'welcome',
+
+            goToPage: function (pageId) {
+                // Hide current page
+                document.getElementById(`${this.currentPage}-page`).classList.remove('active');
+
+                // Show new page
+                document.getElementById(`${pageId}-page`).classList.add('active');
+                this.currentPage = pageId;
+
+                // Initialize page if needed
+                this.initializePage(pageId);
+            },
+
+            initializePage: function (pageId) {
+                switch (pageId) {
+                    case 'levels':
+                        GameState.initializeLevelsPage();
+                        break;
+                    case 'admin':
+                        if (!Admin.isLoggedIn) {
+                            document.getElementById('admin-login-form').style.display = 'block';
+                            document.getElementById('admin-panel-content').style.display = 'none';
+                        } else {
+                            Admin.loadGameHistory();
+                            Admin.loadStats();
+                        }
+                        break;
+                    case 'timer':
+                        // Set default timer selection
+                        document.querySelectorAll('.timer-card').forEach(card => {
+                            card.classList.remove('active');
+                            if (parseInt(card.dataset.time) === GameState.selectedTimer) {
+                                card.classList.add('active');
+                            }
+                        });
+                        break;
+                }
+            }
+        };
+
+        // ===== ADMIN SYSTEM =====
+        const Admin = {
+            isLoggedIn: false,
+
+            login: function () {
+                const username = document.getElementById('admin-username').value;
+                const password = document.getElementById('admin-password').value;
+
+                if (username === 'admin' && password === '1234') {
+                    this.isLoggedIn = true;
+                    document.getElementById('admin-login-form').style.display = 'none';
+                    document.getElementById('admin-panel-content').style.display = 'block';
+                    this.loadGameHistory();
+                    this.loadStats();
+                } else {
+                    alert('Invalid admin credentials. Please try again.');
+                }
+            },
+
+            logout: function () {
+                this.isLoggedIn = false;
+                document.getElementById('admin-username').value = '';
+                document.getElementById('admin-password').value = '';
+                Navigation.goToPage('welcome');
+            },
+
+            loadGameHistory: function () {
+                const gameHistory = JSON.parse(localStorage.getItem('matchTheTile_history')) || [];
+                const tableBody = document.getElementById('history-table-body');
+
+                tableBody.innerHTML = '';
+
+                if (gameHistory.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                No game history found. Play some games to see results here.
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                // Sort by most recent first
+                gameHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Populate table
+                gameHistory.forEach(game => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${game.username}</td>
+                        <td>${game.date}</td>
+                        <td>${game.level}</td>
+                        <td>${game.timer}s</td>
+                        <td>${game.score}</td>
+                        <td>${game.moves}</td>
+                        <td><span class="result-badge ${game.result === 'Win' ? 'badge-win' : 'badge-lose'}">${game.result}</span></td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            },
+
+            loadStats: function () {
+                const gameHistory = JSON.parse(localStorage.getItem('matchTheTile_history')) || [];
+                const statsContainer = document.getElementById('admin-stats');
+
+                if (gameHistory.length === 0) {
+                    statsContainer.innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Total Games</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Unique Players</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Average Score</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0%</div>
+                            <div class="stat-label">Win Rate</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Calculate stats
+                const totalGames = gameHistory.length;
+                const uniquePlayers = [...new Set(gameHistory.map(game => game.username))].length;
+                const totalScore = gameHistory.reduce((sum, game) => sum + game.score, 0);
+                const averageScore = Math.round(totalScore / totalGames);
+                const wins = gameHistory.filter(game => game.result === 'Win').length;
+                const winRate = Math.round((wins / totalGames) * 100);
+
+                statsContainer.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-value">${totalGames}</div>
+                        <div class="stat-label">Total Games</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${uniquePlayers}</div>
+                        <div class="stat-label">Unique Players</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${averageScore}</div>
+                        <div class="stat-label">Average Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${winRate}%</div>
+                        <div class="stat-label">Win Rate</div>
+                    </div>
+                `;
+            },
+
+            // NEW: Clear All History Function
+            clearAllHistory: function () {
+                if (confirm('⚠️ WARNING: This will permanently delete ALL game data including:\n\n• All player usernames\n• All completed levels\n• All game scores\n• All time records\n• All game history\n\nThis action cannot be undone. Are you sure?')) {
+                    // Clear all localStorage data
+                    localStorage.removeItem('matchTheTile_username');
+                    localStorage.removeItem('matchTheTile_completedLevels');
+                    localStorage.removeItem('matchTheTile_history');
+
+                    // Reset game state
+                    GameState.currentUser = '';
+                    GameState.completedLevels = [];
+
+                    // Update admin panel
+                    this.loadGameHistory();
+                    this.loadStats();
+
+                    // Show success message
+                    alert('✅ All game history has been successfully cleared!');
+                }
+            }
+        };
+
+        // ===== INITIALIZATION =====
+        function init() {
+            // Load saved username
+            const savedUser = localStorage.getItem('matchTheTile_username');
+            if (savedUser) {
+                GameState.currentUser = savedUser;
+                document.getElementById('username-input').value = savedUser;
+            }
+
+            // Add keyboard support
+            document.getElementById('username-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') GameState.setUsername();
+            });
+
+            document.getElementById('admin-password').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') Admin.login();
+            });
+
+            // Initialize timer selection
+            document.querySelectorAll('.timer-card').forEach(card => {
+                const time = parseInt(card.dataset.time);
+                card.onclick = () => GameState.selectTimer(time);
+            });
+
+            console.log('Match The Tile game initialized successfully!');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
